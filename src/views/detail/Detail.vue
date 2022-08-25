@@ -1,14 +1,14 @@
 <template>
   <div id="detail">
-    <detail-nav-bar class="detail-nav" @click="titleClick"/>
+    <detail-nav-bar class="detail-nav" @titleClick="titleClick"/>
     <scroll class="content" ref="scroll">
       <detail-swiper :top-images="topImages" />
       <detail-base-info :goods="goods" />
       <detail-shop-info :shop="shop" />
       <detail-goods-info :detail-info="detailInfo" @imageLoad="imageLoad"/>
-      <detail-param-info :param-info="paramInfo"/>
-      <detail-comment-info :comment-info ="commentInfo"/>
-      <goods-list :goods="recommends"/>
+      <detail-param-info ref="params" :param-info="paramInfo"/>
+      <detail-comment-info ref="comment" :comment-info ="commentInfo"/>
+      <goods-list ref="recommend" :goods="recommends"/>
     </scroll>
   </div>
 </template>
@@ -52,7 +52,9 @@ export default {
       paramInfo:{},
       themImgListenr:[],
       commentInfo:{},
-      recommends:[]
+      recommends:[],
+      themeTopYs:[],
+      getThemeTopY:null
     };
   },
   created() {
@@ -93,13 +95,23 @@ export default {
       this.recommends = res.data.list;
 
     })
+
+    this.getThemeTopY = debounce(()=>{
+      this.themeTopYs = []
+      this.themeTopYs.push(0);
+      this.themeTopYs.push(this.$refs.params.$el.offsetTop -44)
+      this.themeTopYs.push(this.$refs.comment.$el.offsetTop -44)
+      this.themeTopYs.push(this.$refs.recommend.$el.offsetTop -44 )
+    },500)
   },
   methods: {
     imageLoad() {
-      this.$refs.scroll.refresh()
+      this.getThemeTopY()
+      // this.$refs.scroll.refresh()
     },
-    titleClick(){
-
+    titleClick(index){
+      console.log(index);
+      this.$refs.scroll.scrollTo(0,-this.themeTopYs[index],100)
     }
   },
   mounted() {
