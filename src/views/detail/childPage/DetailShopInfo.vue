@@ -50,6 +50,11 @@ export default {
       },
     },
   },
+  data(){
+      return{
+        sellCountFilter:null
+      }
+    },
   filters: {
     sellCountFilter: function (value) {
       if (value < 10000) return value;

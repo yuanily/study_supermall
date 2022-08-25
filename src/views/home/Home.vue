@@ -75,6 +75,7 @@ export default {
   },
   deactivated() {
     this.saveY = this.$refs.scroller.getScrollY();
+
   },
   created() {
     // banner\推荐
@@ -158,7 +159,7 @@ export default {
   mounted() {
     const refresh = debounce(this.$refs.scroller.refresh, 500);
     // 监听图片加载事件
-    this.$bus.on("itemImageLoad", () => {
+    this.$bus.on("homeitemImageLoad", () => {
       // console.log(data);
       refresh();
     });
