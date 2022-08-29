@@ -1,15 +1,21 @@
 <template>
   <div id="detail">
-    <detail-nav-bar class="detail-nav" @titleClick="titleClick"/>
-    <scroll class="content" ref="scroll">
+    <detail-nav-bar class="detail-nav" @titleClick="titleClick" ref="nav"/>
+    <scroll
+      class="content"
+      :probe-type="3"
+      ref="scroll"
+      @scroll="contentScroll"
+    >
       <detail-swiper :top-images="topImages" />
       <detail-base-info :goods="goods" />
       <detail-shop-info :shop="shop" />
-      <detail-goods-info :detail-info="detailInfo" @imageLoad="imageLoad"/>
-      <detail-param-info ref="params" :param-info="paramInfo"/>
-      <detail-comment-info ref="comment" :comment-info ="commentInfo"/>
-      <goods-list ref="recommend" :goods="recommends"/>
+      <detail-goods-info :detail-info="detailInfo" @imageLoad="imageLoad" />
+      <detail-param-info ref="params" :param-info="paramInfo" />
+      <detail-comment-info ref="comment" :comment-info="commentInfo" />
+      <goods-list ref="recommend" :goods="recommends" />
     </scroll>
+    <detail-bottom-bar/>
   </div>
 </template>
 
@@ -19,13 +25,20 @@ import DetailSwiper from "views/detail/childPage/DetailSwiper";
 import DetailBaseInfo from "views/detail/childPage/DetailBaseInfo";
 import DetailShopInfo from "views/detail/childPage/DetailShopInfo";
 import DetailGoodsInfo from "views/detail/childPage/DetailGoodsInfo";
-import DetailParamInfo from 'views/detail/childPage/DetailParamInfo';
-import DetailCommentInfo from 'views/detail/childPage/DetailCommentInfo';
+import DetailParamInfo from "views/detail/childPage/DetailParamInfo";
+import DetailCommentInfo from "views/detail/childPage/DetailCommentInfo";
+import DetailBottomBar from "views/detail/childPage/DetailBottomBar";
 
 import Scroll from "components/common/scroller/Scroller";
-import GoodsList from "components/contents/goods/GoodsList"
+import GoodsList from "components/contents/goods/GoodsList";
 
-import { getDetail, Goods, Shop, GoodsParam,getRecommend} from "network/detail";
+import {
+  getDetail,
+  Goods,
+  Shop,
+  GoodsParam,
+  getRecommend,
+} from "network/detail";
 import { debounce } from "../../store/utils";
 
 export default {
@@ -38,7 +51,8 @@ export default {
     DetailGoodsInfo,
     DetailParamInfo,
     DetailCommentInfo,
-    GoodsList
+    DetailBottomBar,
+    GoodsList,
   },
   name: "detail",
 
@@ -48,13 +62,13 @@ export default {
       topImages: [],
       goods: {},
       shop: {},
-      detailInfo:{},
-      paramInfo:{},
-      themImgListenr:[],
-      commentInfo:{},
-      recommends:[],
-      themeTopYs:[],
-      getThemeTopY:null
+      detailInfo: {},
+      paramInfo: {},
+      themImgListenr: [],
+      commentInfo: {},
+      recommends: [],
+      themeTopYs: [],
+      getThemeTopY: null,
     };
   },
   created() {
@@ -80,12 +94,15 @@ export default {
       // 4.保存商品的详情数据
       this.detailInfo = data.detailInfo;
 
-        // 5.获取参数的信息
-      this.paramInfo = new GoodsParam(data.itemParams.info, data.itemParams.rule)
+      // 5.获取参数的信息
+      this.paramInfo = new GoodsParam(
+        data.itemParams.info,
+        data.itemParams.rule
+      );
 
       // 6.获取评论的信息
-      if(data.rate.cRate !== 0 ){
-        this.commentInfo = data.rate.list[0]
+      if (data.rate.cRate !== 0) {
+        this.commentInfo = data.rate.list[0];
       }
     });
 
@@ -93,26 +110,47 @@ export default {
     getRecommend().then((res) => {
       console.log(res);
       this.recommends = res.data.list;
+    });
 
-    })
-
-    this.getThemeTopY = debounce(()=>{
-      this.themeTopYs = []
+    this.getThemeTopY = debounce(() => {
+      this.themeTopYs = [];
       this.themeTopYs.push(0);
-      this.themeTopYs.push(this.$refs.params.$el.offsetTop -44)
-      this.themeTopYs.push(this.$refs.comment.$el.offsetTop -44)
-      this.themeTopYs.push(this.$refs.recommend.$el.offsetTop -44 )
-    },500)
+      this.themeTopYs.push(this.$refs.params.$el.offsetTop - 44);
+      this.themeTopYs.push(this.$refs.comment.$el.offsetTop - 44 || this.$refs.recommend.$el.offsetTop - 44);
+      this.themeTopYs.push(this.$refs.recommend.$el.offsetTop - 44);
+      this.themeTopYs.push(Number.MAX_VALUE)
+    }, 500);
   },
   methods: {
     imageLoad() {
-      this.getThemeTopY()
+      this.getThemeTopY();
       // this.$refs.scroll.refresh()
     },
-    titleClick(index){
-      console.log(index);
-      this.$refs.scroll.scrollTo(0,-this.themeTopYs[index],100)
-    }
+    titleClick(index) {
+      this.$refs.scroll.scrollTo(0, -this.themeTopYs[index], 100);
+    },
+    contentScroll(position) {
+      // 1.获取y值
+      const positionY = -position.y;
+      // 2.position与主题中的值进行对比
+      let length = this.themeTopYs.length;
+      for (let i = 0; i < length - 1; i++) {
+        // if (
+        //   this.currentIndex != i &&
+        //   ((i < length - 1 &&
+        //     positionY > this.themeTopYs[i] &&
+        //     positionY < this.themeTopYs[i + 1]) ||
+        //     (i == length - 1 && positionY > this.themeTopYs[i]))
+        // ) {
+        //   this.currentIndex = i;
+        //   this.$refs.nav.currentIndex = this.currentIndex
+        // }
+        if(positionY > this.themeTopYs[i] && positionY < this.themeTopYs[i+1]){
+          this.currentIndex = i;
+          this.$refs.nav.currentIndex = this.currentIndex
+        }
+      }
+    },
   },
   mounted() {
     const refresh = debounce(this.$refs.scroll.refresh, 500);
