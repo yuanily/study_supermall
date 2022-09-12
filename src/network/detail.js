@@ -23,8 +23,9 @@ export class Goods {
     this.oldPrice = itemInfo.oldPrice
     this.discount = itemInfo.discountDesc
     this.columns = columns
+    this.desc = itemInfo.desc;
     this.services = services
-    this.realPrice = itemInfo.lowNowPrice
+    this.realPrice = itemInfo.lowNowPrice;
   }
 }
 

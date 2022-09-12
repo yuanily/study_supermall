@@ -1,6 +1,7 @@
 <template>
   <div id="detail">
-    <detail-nav-bar class="detail-nav" @titleClick="titleClick" ref="nav"/>
+    <div>{{ $store.state.cartList }}</div>
+    <detail-nav-bar class="detail-nav" @titleClick="titleClick" ref="nav" />
     <scroll
       class="content"
       :probe-type="3"
@@ -15,7 +16,8 @@
       <detail-comment-info ref="comment" :comment-info="commentInfo" />
       <goods-list ref="recommend" :goods="recommends" />
     </scroll>
-    <detail-bottom-bar/>
+    <detail-bottom-bar @addCart="addToCart" />
+    <back-top @click.native="backClick" v-show="isShowBackTop"></back-top>
   </div>
 </template>
 
@@ -29,6 +31,7 @@ import DetailParamInfo from "views/detail/childPage/DetailParamInfo";
 import DetailCommentInfo from "views/detail/childPage/DetailCommentInfo";
 import DetailBottomBar from "views/detail/childPage/DetailBottomBar";
 
+import BackTop from "components/contents/backTop/BackTop";
 import Scroll from "components/common/scroller/Scroller";
 import GoodsList from "components/contents/goods/GoodsList";
 
@@ -53,6 +56,7 @@ export default {
     DetailCommentInfo,
     DetailBottomBar,
     GoodsList,
+    BackTop,
   },
   name: "detail",
 
@@ -69,6 +73,7 @@ export default {
       recommends: [],
       themeTopYs: [],
       getThemeTopY: null,
+      isShowBackTop: false,
     };
   },
   created() {
@@ -116,9 +121,12 @@ export default {
       this.themeTopYs = [];
       this.themeTopYs.push(0);
       this.themeTopYs.push(this.$refs.params.$el.offsetTop - 44);
-      this.themeTopYs.push(this.$refs.comment.$el.offsetTop - 44 || this.$refs.recommend.$el.offsetTop - 44);
+      this.themeTopYs.push(
+        this.$refs.comment.$el.offsetTop - 44 ||
+          this.$refs.recommend.$el.offsetTop - 44
+      );
       this.themeTopYs.push(this.$refs.recommend.$el.offsetTop - 44);
-      this.themeTopYs.push(Number.MAX_VALUE)
+      this.themeTopYs.push(Number.MAX_VALUE);
     }, 500);
   },
   methods: {
@@ -128,6 +136,9 @@ export default {
     },
     titleClick(index) {
       this.$refs.scroll.scrollTo(0, -this.themeTopYs[index], 100);
+    },
+    backClick() {
+      this.$refs.scroll.scrollTo(0, 0);
     },
     contentScroll(position) {
       // 1.获取y值
@@ -145,11 +156,29 @@ export default {
         //   this.currentIndex = i;
         //   this.$refs.nav.currentIndex = this.currentIndex
         // }
-        if(positionY > this.themeTopYs[i] && positionY < this.themeTopYs[i+1]){
+        if (
+          positionY > this.themeTopYs[i] &&
+          positionY < this.themeTopYs[i + 1]
+        ) {
           this.currentIndex = i;
-          this.$refs.nav.currentIndex = this.currentIndex
+          this.$refs.nav.currentIndex = this.currentIndex;
         }
+
+        // 3.是否回到顶部
+        this.isShowBackTop = -position.y > 500 ? true : false;
       }
+    },
+    addToCart() {
+      // 1.获取购物车需要展示的信息
+      const product = {};
+      product.image = this.topImages[0];
+      product.title = this.goods.title;
+      product.desc = this.goods.desc;
+      product.price = this.goods.realPrice;
+      product.iid = this.idd;
+
+      // 2.将商品添加到购物车中
+      this.$store.dispatch("addCart", product);
     },
   },
   mounted() {
@@ -176,7 +205,6 @@ export default {
   z-index: 9;
   background-color: #fff;
 }
-
 .content {
   height: calc(100% - 44px);
 }
