@@ -15,15 +15,17 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
   .check-button{
     /* background-color: red; */
     border-radius: 50%;
     border: 2px solid #aaa;
+    /* line-height: 20px; */
   }
 
   .check{
-    border-color: red;
+
     background-color: red;
+    overflow: hidden;
   }
 </style>

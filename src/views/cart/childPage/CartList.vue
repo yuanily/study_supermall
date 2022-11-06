@@ -1,8 +1,10 @@
 <template>
   <div class="cart-list">
-    <Scroll>
+    <scroll
+      class="content" ref="scroll">
       <cart-list-item v-for="(item,index) in cartList" :key="index" :item-info="item"></cart-list-item>
-    </Scroll>
+      
+    </scroll>
   </div>
 </template>
 
@@ -20,11 +22,19 @@ export default {
     Scroll,
     CartListItem,
   },
+  activated(){
+    console.log(11);
+    this.$refs.scroll.refresh()
+  }
 };
 </script>
 
 <style scoped>
 .cart-list {
-  height: 100%;
+  height: calc(100vh - 44px - 49px - 60px);
+}
+.content{
+  height:100%;
+  overflow: hidden;
 }
 </style>

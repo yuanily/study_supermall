@@ -14,7 +14,7 @@
       <div class="item-desc">{{ itemInfo.desc }}</div>
       <div class="info-bottom">
         <div class="item-price left">{{ itemInfo.price }}</div>
-        <div class="item-count right">{{ itemInfo.count }}</div>
+        <div class="item-count right">X{{ itemInfo.count }}</div>
       </div>
     </div>
   </div>
@@ -105,5 +105,8 @@ export default {
 
 .info-bottom .item-price {
   color: orangered;
+}
+.item-count.right{
+  width: 10%;
 }
 </style>

@@ -1,6 +1,5 @@
 <template>
   <div id="detail">
-    <div>{{ $store.state.cartList }}</div>
     <detail-nav-bar class="detail-nav" @titleClick="titleClick" ref="nav" />
     <scroll
       class="content"
@@ -34,7 +33,6 @@ import DetailBottomBar from "views/detail/childPage/DetailBottomBar";
 import BackTop from "components/contents/backTop/BackTop";
 import Scroll from "components/common/scroller/Scroller";
 import GoodsList from "components/contents/goods/GoodsList";
-
 import {
   getDetail,
   Goods,
@@ -62,7 +60,7 @@ export default {
 
   data() {
     return {
-      idd: null,
+      iid: null,
       topImages: [],
       goods: {},
       shop: {},
@@ -74,12 +72,14 @@ export default {
       themeTopYs: [],
       getThemeTopY: null,
       isShowBackTop: false,
+      message:'',
+      show:false
     };
   },
   created() {
-    this.idd = this.$route.params.iid;
-    // 根据idd请求详情数据
-    getDetail(this.idd).then((res) => {
+    this.iid = this.$route.params.iid;
+    // 根据iid请求详情数据
+    getDetail(this.iid).then((res) => {
       // console.log(res);
       const data = res.result;
 
@@ -113,7 +113,6 @@ export default {
 
     // 获取推荐
     getRecommend().then((res) => {
-      console.log(res);
       this.recommends = res.data.list;
     });
 
@@ -175,10 +174,11 @@ export default {
       product.title = this.goods.title;
       product.desc = this.goods.desc;
       product.price = this.goods.realPrice;
-      product.iid = this.idd;
+      product.iid = this.iid;
 
       // 2.将商品添加到购物车中
-      this.$store.dispatch("addCart", product);
+      this.$store.dispatch("addCart", product)
+      this.$toast.show ( `添加商品成功` ) ;
     },
   },
   mounted() {
